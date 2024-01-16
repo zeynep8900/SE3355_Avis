@@ -90,20 +90,20 @@
         <button> <a href="{{ url_for('signup') }}" class="btn btn-light btn-signup">Eğer hesabınız yoksa kaydolun...</a></button>
         <button id="googleLoginButton">Google ile Giriş Yap</button>
     </div>
-    <!-- Add an "id" attribute to the button for easier targeting with JavaScript -->
+  
 
 
-<!-- Include the necessary Google Sign-In API script -->
+
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 
-<!-- Add JavaScript code to handle Google login -->
+
 <script>
     function googleLogin() {
         // Trigger Google Sign-In when the button is clicked
         gapi.auth2.getAuthInstance().signIn();
     }
 
-    // Initialize Google Sign-In with your client ID
+
     function initGoogleSignIn() {
         gapi.load('auth2', function() {
             gapi.auth2.init({
@@ -112,10 +112,10 @@
         });
     }
 
-    // Attach the click event to the button
+   
     document.getElementById('googleLoginButton').addEventListener('click', googleLogin);
 
-    // Call the initialization function when the page is loaded
+   
     window.onload = function() {
         initGoogleSignIn();
     };
