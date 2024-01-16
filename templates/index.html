@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Araç Kiralama Hizmetleri</title>
+
+    <!-- Bootstrap CSS JS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <!-- Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEWxgoRsz-TDeRN-Juh-WKWNuvg5MTy6k&libraries=places"></script>
+
+   
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .navbar-main {
+            background-color: #dc3545;
+            position: sticky;
+        }
+
+        .navbar-main .navbar-brand {
+            font-size: 36px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .navbar-main .navbar-toggler-icon {
+            background-color: #fff;
+        }
+
+        .navbar-main .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        .navbar-secondary {
+            background-color: #343a40;
+            padding: 10px 0;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .navbar-secondary .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        .navbar-secondary .btn-arac-kirala {
+            border-radius: 5px;
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .jumbotron {
+            background-color: #dc3545;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .login-link {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .search-form {
+            margin-top: 8px;
+            margin-right: 15px;
+        }
+
+        .feature-box {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        #avis-locations h3 {
+            color: red;
+        }
+
+        
+        #avis-locations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+       
+        #avis-locations li {
+            margin-bottom: 10px;
+        }
+
+     
+        #avis-locations li p {
+            padding-left: 20px; 
+        }
+
+        #map {
+            height: 400px; 
+        }
+    </style>
+</head>
+
+<body>
+
+    <div>
+     
+        {% if user_info %}
+        <p>Hoşgeldiniz, {{ user_info.username }}!.</p>
+        {% endif %}
+    </div>
+
+   
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-main">
+        <a class="navbar-brand" href="#">AVIS</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+            {% if User %}
+                <li class="nav-item">
+                    <p class="nav-link">Merhaba, {{ User.username }}!</p>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('logout') }}" class="nav-link">Çıkış Yap</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a href="{{ url_for('redirect_to_login') }}" class="login-link">Üye Girişi</a>
+                </li>
+            {% endif %}
+                
+            </ul>
+            
+            <form class="d-flex search-form" method="post" action="/ara" role="ara">
+                <input class="form-control me-2" type="search" name="product_search" placeholder="Ürün Ara"
+                    aria-label="ara">
+                <button class="btn btn-outline-light" type="submit">Ara</button>
+            </form>
+        </div>
+    </nav>
+
+  
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-secondary">
+        <a class="navbar-brand" href="#">Araç Kirala</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSecondary"
+            aria-controls="navbarSecondary" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </nav>
+
+  
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-secondary" style="background-color: #464545;">
+
+        <form method="post" action="/search" id="form" role="search">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="pickupLocation" class="text-white">Teslim Alma Ofisi</label>
+                        <select  class="form-control" name="pickupLocation" id="pickupLocation">
+                            {% for location in locations %}
+                            <option value="{{ location['name'] }}">{{ location['name'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="pickupDate" class="text-white">Alış Tarihi</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" name="pickupDate" id="pickupDate">
+                            <input type="time" class="form-control" name="pickupTime" id="pickupTime">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="returnLocation" class="text-white">Iade Ofisi</label>
+                        <select class="form-control" name="returnLocation" id="returnLocation">
+                            {% for location in locations %}
+                            <option value="{{ location['name'] }}">{{ location['name'] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="returnDate" class="text-white">Iade Tarihi</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" name="returnDate" id="returnDate">
+                            <input type="time" class="form-control" name="returnTime" id="returnTime">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 ml-auto">
+                   
+                        
+                        <input type="hidden" name="days_difference" value="{{ days_difference }}">
+
+                            <button id="kirala" 
+                            disabled
+                            type="submit" class="btn btn-primary"
+                                style="background-color: red; border: none;">
+
+                                {% if days_difference %}
+                                Kirala ({{ days_difference }} Gün)
+                                {% else %}
+                                Kirala
+                                {% endif %}
+
+                            </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </nav>
+
+    <!--    <nav class="navbar navbar-expand-lg navbar-dark navbar-secondary">
+        <div class="collapse navbar-collapse" id="navbarSecondary">
+            <ul class="navbar-nav ml-auto">
+               
+            </ul>
+        </div>
+        <button class="btn btn-light btn-arac-kirala ml-3">2 Gün Kirala</button>
+    </nav> -->
+
+    <div class="container-fluid">
+        <div class="row">
+           
+            <div class="col-md-4" id="avis-locations">
+                
+
+                <h2>Avis Ofisi</h2>
+                <ul>
+                    <li>
+                        <h3>1 İzmir Alsancak Şehir</h3>
+                        <p>İsmet Kaptan Mh, Gaziosmanpaşa Bulvarı N:7 Hilton İzmir 2.blok Z03, 35210 Konak/İzmir</p>
+                        <p>Telefon: 0232 441 44 17 - 0232 441 44 18</p>
+                        <p>Pazartesi - Pazar </p>
+                        <p>09:00 - 19:00</p>
+                    </li>
+                    <li>
+                        <h3>2 AVIS KARAVAN İZMİR </h3>
+                        <p>Dokuz Eylül Mah. 695 Sok. No:36/C Sarnıç Gaziemir / İzmir </p>
+                        <p>Telefon 4442847</p>
+                        <p>Pazartesi - Pazar </p>
+                        <p>09:00 - 19:00</p>
+                    </li>
+                
+                </ul>
+
+            </div>
+
+   
+            <div class="col-md-8" id="map"></div>
+        </div>
+    </div>
+
+  
+    <script>
+        const form = document.getElementById('form')
+        const pickupLocation=document.getElementById('pickupLocation')
+        const pickupDate=document.getElementById('pickupDate')
+        const pickupTime=document.getElementById('pickupTime')
+        const returnLocation=document.getElementById('returnLocation')
+        const returnDate=document.getElementById('returnDate')
+        const returnTime=document.getElementById('returnTime')
+        const kiralaButton=document.getElementById('kirala')
+
+        
+        
+
+        form.addEventListener('change', (e) => {
+            console.log (pickupLocation.value, pickupDate.value, pickupTime.value, returnLocation.value, returnDate.value, returnTime.value )
+          if(!pickupLocation.value && !pickupDate.value && !pickupTime.value&& !returnLocation.value && !returnDate.value && !returnTime.value)
+          {
+            kiralaButton.removeAttribute('disabled')
+          }else {
+            kiralaButton.removeAttribute('disabled')
+          }
+        })
+        
+
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 38.4192, lng: 27.1287 }, 
+                zoom: 8
+            });
+
+            var locations = [
+                {
+                    name: 'İzmir Alsancak Şehir',
+                    address: 'İsmet Kaptan Mh, Gaziosmanpaşa Bulvarı N:7 Hilton İzmir 2.blok Z03, 35210 Konak/İzmir',
+                    phone: '0232 441 44 17 - 0232 441 44 18',
+                    hours: 'Pazartesi - Pazar: 09:00 - 19:00',
+                    coords: { lat: 38.420556, lng: 27.129722 }
+                },
+                {
+                    name: 'AVIS KARAVAN İZMİR',
+                    address: 'Dokuz Eylül Mah. 695 Sok. No:36/C Sarnıç Gaziemir / İzmir',
+                    phone: '4442847',
+                    hours: 'Pazartesi - Pazar: 09:00 - 19:00',
+                    coords: { lat: 38.318333, lng: 27.144167 }
+                }
+                
+            ];
+
+            
+            locations.forEach(function (location) {
+                var marker = new google.maps.Marker({
+                    position: location.coords,
+                    map: map,
+                    title: location.name
+                });
+
+                var infowindow = new google.maps.InfoWindow({
+                    content: '<h3>' + location.name + '</h3>' +
+                        '<p>' + location.address + '</p>' +
+                        '<p>Telefon: ' + location.phone + '</p>' +
+                        '<p>' + location.hours + '</p>'
+                });
+
+                marker.addListener('click', function () {
+                    infowindow.open(map, marker);
+                });
+            });
+        }
+
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            console.error(browserHasGeolocation ?
+                'Error: The Geolocation service failed.' :
+                'Error: Your browser doesn\'t support geolocation.');
+        }
+
+      
+        var pickupAutocomplete = new google.maps.places.Autocomplete(document.getElementById('pickupLocation'));
+        var returnAutocomplete = new google.maps.places.Autocomplete(document.getElementById('returnLocation'));
+
+
+        window.onload = function () {
+            initMap();
+        };
+
+        
+    </script>
+
+   
+   
+
+</body>
+
+</html>

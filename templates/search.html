@@ -1,0 +1,132 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+        .card-img-top {
+            max-height: 200px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+
+    {% if search_info %}
+        <div class="container mt-3">
+            <div style="background-color: lightgrey;">
+                <p>
+                    {{ search_info.get('pickup_date') }} > {{ search_info.get('return_date') }}
+                </p>
+                <p>
+                    {{ search_info.get('pickup_location') }} / {{ search_info.get('return_location') }}
+                </p>
+            
+            </div>
+
+        </div>
+    {% endif %}
+
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-3">
+                <form method="post" action="/search">
+                   
+                    <div class="form-group">
+                        <label for="makeFilter">Araç Tipi:</label>
+                        <select class="form-control" id="makeFilter" name="make_filter">
+                            <option value="">Tüm Araçlar</option>
+                            <option value="">EKONOMİK</option>
+                            <option value="">KONFOR</option>
+                            <option value="">PRESTIJ</option>
+                            <option value="">PREMIUM</option>
+                            <option value="">LÜKS</option>
+                     
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="orderByPrice">Sırala:</label>
+                        <select class="form-control" id="orderByPrice" name="order_by_price">
+                            <option value="asc">En Düşük Fiyat</option>
+                            <option value="desc">En Yüksek Fiyat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="transmissionFilter">Şanzıman Tipi:</label>
+                        <select class="form-control" id="transmissionFilter" name="transmission_filter">
+                            <option value="">Tümü</option>
+                            <option value="asc">Manuel</option>
+                            <option value="asc">Otomatik</option>
+                           
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary" style="background-color: red; border:none">Filtreleri Uygula</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+   
+    <div class="container mt-3">
+        <div class="row" id="productList">
+           
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <span style="color: red;">
+                            <strong>{{ product.type }} </strong>
+                            <span style="color: red;">&rarr; 
+                                <a href="#" style="color: red;">Tüm Özellikler/Kiralama Şartları</a></span>
+                            
+                        </span>
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <img src="{{ product.image_url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
+                        <div class="card-body">
+                            
+                            <p class="card-text">
+                                
+                                <strong><span style="color: red;">{{ product.price }} TL </span></strong>
+
+                            </p>
+                            <p class="card-text">
+                                <strong></strong> {{ product.transmission }} <br>
+                                <strong></strong> {{ product.deposit }} <br>
+                                <strong></strong> {{ product.mileage }} <br>
+                                <strong></strong> {{ product.age }}
+                            </p>
+                            
+                        </div>
+
+                        <div class="card-footer text-right">
+                            <form method="post" action="{{ url_for('rent', product_id=product.id) }}">
+                                <button type="submit" class="btn btn-danger">Hemen Kirala</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+  
+
+</body>
+</html>
